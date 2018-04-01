@@ -40,7 +40,7 @@ int lsCommand(char *command){
         printf("could not create process for the ls command");
     } else {// father process
         printf("%d\n", result);
-        if(isAmperent(command)) // the father has no need to wait for the sons process
+        if(isAmpersent(command)) // the father has no need to wait for the sons process
             return result;
         else
            waitpid(result, NULL, 0);
@@ -48,7 +48,7 @@ int lsCommand(char *command){
     return result;
 }
 
-int isAmperent(char *command){
+int isAmpersent(char *command){
 
     char *argv[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
@@ -74,9 +74,7 @@ int catCommand(char *command){
     int j = 0;
     char *argv[COMMAND_LENGTH];// moving the arguments to an array
     pid_t result = fork();
-
     if(result == 0){ //the sons process
-
         makeArgumentsArray(command,argv);
         j = execvp(argv[0],argv);
         if (j == -1){
@@ -84,12 +82,11 @@ int catCommand(char *command){
             perror("execvp");
             exit (EXIT_FAILURE);
         }
-
     } else if (result ==-1){
         printf("could not create process for the ls command");
     } else {// father process
         printf("%d\n", result);
-        if(isAmperent(command)) // the father has no need to wait for the sons process
+        if(isAmpersent(command)) // the father has no need to wait for the sons process
             return result;
         else
             waitpid(result, NULL, 0);
@@ -99,11 +96,10 @@ int catCommand(char *command){
 
 int sleepCommand(char *command){
     int j = 0;
-
     char *argv[COMMAND_LENGTH];// moving the arguments to an array
     pid_t result = fork();
 
-    if(result != 0){ //the sons process
+    if(result == 0){ //the sons process
         makeArgumentsArray(command,argv);
         j = execvp(argv[0],argv);
         if (j == -1){
@@ -115,13 +111,12 @@ int sleepCommand(char *command){
         printf("could not create process for the ls command");
     } else {// father process
         printf("%d\n", result);
-        if(isAmperent(command)) // the father has no need to wait for the sons process
+        if(isAmpersent(command)) // the father has no need to wait for the sons process
             return result;
         else
             waitpid(result, NULL, 0);
     }
     return result;
-
 }
 
 void makeArgumentsArray(char *command, char *argv[COMMAND_LENGTH]){
@@ -130,13 +125,13 @@ void makeArgumentsArray(char *command, char *argv[COMMAND_LENGTH]){
     //split = strtok(NULL," ");
     while(split != NULL)
     {
-        if(strcmp(split, "&") != 0)
+        if(strcmp(split, "&") != 0) {
             argv[i] = split;
+        }
         split = strtok(NULL," ");
         i++;
     }
     argv[i] = NULL;
-    argv[strlen(argv)-1] = '\0';
 }
 
 int main() {
@@ -145,7 +140,6 @@ int main() {
     char line[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
     pid_t pid; // the process that is currently running.
-    int status;
 
     while (1) {
 
@@ -160,7 +154,7 @@ int main() {
         } else if(strcmp(cmd,"cat") == 0){
             pid = catCommand(line);
         } else if(strcmp(cmd,"sleep") == 0){
-            pid = sleepCommand(line);
+            pid = catCommand(line);
         } else if(strcmp(cmd,"cd") == 0){
 
         } else if (strcmp(cmd,"jobs") == 0){
