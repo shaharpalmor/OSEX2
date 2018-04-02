@@ -125,7 +125,7 @@ int main() {
     char line[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
     pid_t pid; // the process that is currently running.
-    char *jobsArray[COMMAND_LENGTH];
+    char jobsArray[COMMAND_LENGTH][COMMAND_LENGTH];
     int pidArray[COMMAND_LENGTH];
     int i = 0;
     int j, l;
@@ -144,7 +144,7 @@ int main() {
         } else if (!strcmp(cmd, "jobs") == 0) {
             pid = execCommand(line);
             pidArray[i] = pid;
-            strcpy(&jobsArray[i], cmd);
+            strcpy(jobsArray[i], cmd);
             i++;
         } else if (strcmp(cmd, "jobs") == 0) { // jobs command was asked.
             for (j = 0; j < i; j++) {
