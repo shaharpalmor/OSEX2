@@ -1,9 +1,7 @@
-//#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <wait.h>
-#include <malloc.h>
 #include <stdlib.h>
 
 #define COMMAND_LENGTH 42
@@ -11,7 +9,6 @@
 void makeArgumentsArray(char *command, char *argv[COMMAND_LENGTH]) {
     int i = 0;
     char *split = strtok(command, " ");
-    //split = strtok(NULL," ");
     while (split != NULL) {
         if (strcmp(split, "&") != 0) {
             argv[i] = split;
@@ -90,7 +87,6 @@ int execCommand(char *command) {
         j = execvp(argv[0], argv);
         if (j == -1) {
             fprintf(stderr, "Failed to execute %s\n", argv[0]);
-            perror("execvp");
             exit(EXIT_FAILURE);
         }
     } else if (result == -1) {
@@ -105,19 +101,34 @@ int execCommand(char *command) {
     return result;
 }
 
-
+int cdCommand(char *command){
+    char *argv[COMMAND_LENGTH];// moving the arguments to an array
+    makeArgumentsArray(command, argv);
+    if(argv[1] == NULL){
+        // cd does not signify which directory to go to
+        chdir(getenv("HOME"));
+        return 1;
+    } else { // going to the path in the arguments
+        if (argv[1] == -1){
+            perror("no such directory");
+            return  -1;
+        } else { //there is a valid path
+             execCommand(command);
+        }
+    }
+}
 
 
 int main() {
 
-    char *prompt = "prompt> ";
+    char *prompt = "prompt>";
     char line[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
     pid_t pid; // the process that is currently running.
     char *jobsArray[COMMAND_LENGTH];
     int pidArray[COMMAND_LENGTH];
     int i = 0;
-    int j;
+    int j, l;
 
     while (1) {
         printf("%s", prompt);
@@ -128,18 +139,23 @@ int main() {
 
         if (strcmp(cmd, "exit") == 0) {
             break;
+        } else if (strcmp(cmd, "cd") == 0) {
+            pid = cdCommand(line);
         } else if (!strcmp(cmd, "jobs") == 0) {
             pid = execCommand(line);
             pidArray[i] = pid;
-            jobsArray[i] = cmd;
-        } else { // jobs command was asked.
+            strcpy(&jobsArray[i], cmd);
+            i++;
+        } else if (strcmp(cmd, "jobs") == 0) { // jobs command was asked.
             for (j = 0; j < i; j++) {
-                pid_t pidProcess = waitpid(pidArray[i], NULL, WNOHANG);
+                pid_t pidProcess = waitpid(pidArray[j], NULL, WNOHANG);
                 if (pidProcess == 0)
-                    printf("%d %s", pidArray[i], jobsArray[i]);
+                    printf("%d    %s/n", pidArray[j], jobsArray[j]);
             }
+
+        } else {
+            continue;
         }
     }
     return 0;
 }
-
