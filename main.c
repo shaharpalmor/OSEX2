@@ -94,10 +94,11 @@ int execCommand(char *command) {
 int cdCommand(char *command){
     char *argv[COMMAND_LENGTH];// moving the arguments to an array
     makeArgumentsArray(command, argv);
-    if(argv[1] == NULL){
+    if(argv[1] == NULL) {
         // cd does not signify which directory to go to
         chdir(getenv("HOME"));
         return 1;
+
     } else { // going to the path in the arguments
         if (chdir(argv[1]) == -1){
             fprintf(stderr, "Error in system call");
@@ -112,6 +113,7 @@ int main() {
     char *prompt = "prompt>";
     char line[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
+    //char *directoryOld;
     pid_t pid; // the process that is currently running.
     char jobsArray[COMMAND_LENGTH][COMMAND_LENGTH];
     int pidArray[COMMAND_LENGTH];
@@ -132,6 +134,7 @@ int main() {
             printf("%d \n", getpid());
             exit(0);
         } else if (strcmp(cmd, "cd") == 0) {
+            printf("%d \n", getpid());
             pid = cdCommand(line);
         } else if (!strcmp(cmd, "jobs") == 0) {
             pid = execCommand(line);
