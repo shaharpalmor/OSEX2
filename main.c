@@ -39,6 +39,7 @@ int isAmpersent(char *command) {
     char cmd[COMMAND_LENGTH];
     strcpy(cmd, command);
     char *split = strtok(cmd, " ");
+    argv[0] = split;
     split = strtok(NULL, " ");
     int i = 1;
 
@@ -49,9 +50,9 @@ int isAmpersent(char *command) {
     }
     if (strcmp(argv[i - 1], "&") == 0) {
         return 1;// means that the father process should run and not wait for the son
+    }else {
+        return 0;// means that the father process should not run and wait for the son
     }
-    return 0;// means that the father process should not run and wait for the son
-
 }
 
 
@@ -91,7 +92,7 @@ int execCommand(char *command) {
  * @param command  is the command.
  * @return if succeded or not.
  */
-int cdCommand(char *command){
+int cdCommand(char *command, char *dirOld){
     char *argv[COMMAND_LENGTH];// moving the arguments to an array
     makeArgumentsArray(command, argv);
     if(argv[1] == NULL) {
@@ -106,6 +107,32 @@ int cdCommand(char *command){
             return  -1;
         }
     }
+
+    /*
+    int j;
+    if ((argv[1] ==  NULL) || (!strcmp(argv[1], "~") && argv[2] == NULL)) {
+        //get current working directory
+        getcwd(dirOld, sizeof(COMMAND_LENGTH));
+        chdir(getenv("HOME"));
+    } else if (!strcmp(argv[1], "-") && argv[2] == NULL) {
+        char cwd[COMMAND_LENGTH];
+        getcwd(cwd, sizeof(COMMAND_LENGTH));
+        j = chdir(dirOld);
+        if (j == 0) {
+            printf("%s\n", dirOld);
+        }
+        strcpy(dirOld, cwd);
+    } else {
+        //get current working directory
+        getcwd(dirOld, sizeof(COMMAND_LENGTH));
+        j=chdir(argv[1]);
+    }
+    if(j!=0){
+        fprintf(stderr,"Error in system call");
+    }
+*/
+
+
 }
 
 
@@ -114,6 +141,7 @@ int main() {
     char line[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
     //char *directoryOld;
+    char *dirOld;
     pid_t pid; // the process that is currently running.
     char jobsArray[COMMAND_LENGTH][COMMAND_LENGTH];
     int pidArray[COMMAND_LENGTH];
@@ -135,7 +163,7 @@ int main() {
             exit(0);
         } else if (strcmp(cmd, "cd") == 0) {
             printf("%d \n", getpid());
-            pid = cdCommand(line);
+            pid = cdCommand(line, dirOld);
         } else if (!strcmp(cmd, "jobs") == 0) {
             pid = execCommand(line);
             pidArray[i] = pid;
