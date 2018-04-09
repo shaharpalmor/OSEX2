@@ -117,6 +117,7 @@ int main() {
     int pidArray[COMMAND_LENGTH];
     int i = 0;
     int j;
+    line[0] = 0;
 
     while (1) {
         printf("%s", prompt);
@@ -124,10 +125,12 @@ int main() {
         line[strlen(line) - 1] = '\0';
         strcpy(cmd, line);
         strtok(cmd, " ");
-
+        if(line[0] == 0){
+            continue;
+        }
         if (strcmp(cmd, "exit") == 0) {
             printf("%d \n", getpid());
-            break;
+            exit(0);
         } else if (strcmp(cmd, "cd") == 0) {
             pid = cdCommand(line);
         } else if (!strcmp(cmd, "jobs") == 0) {
