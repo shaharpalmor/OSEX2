@@ -88,7 +88,14 @@ int execCommand(char *command) {
     return result;
 }
 
-
+/**
+ * deals with the regular cd command which is  entering the destination in the argv[1]. also deals with the option
+ * that argv[1] is minus and saves in the last dir the last dir it was and prints it.
+ * @param dir is the dir to go to.
+ * @param lastDir is the lat dir it was into.
+ * @param flag is if there is minus or not
+ * @return failure or success.
+ */
 int cdComplexCommand(char *dir, char lastDir[COMMAND_LENGTH], int flag){
     char currentDir[COMMAND_LENGTH];
     getcwd(currentDir,COMMAND_LENGTH);
@@ -107,6 +114,8 @@ int cdComplexCommand(char *dir, char lastDir[COMMAND_LENGTH], int flag){
 
 /**
  * make the cd command. if there is no argv[1] than it goes to the hone directory.
+ * also deals with the option of "~" - going to the home directory
+ * also deals with the - option, going to the privious directory.
  * @param command  is the command.
  * @return if succeeded or not.
  */
