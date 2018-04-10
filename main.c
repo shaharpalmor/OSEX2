@@ -5,6 +5,8 @@
 #include <stdlib.h>
 
 #define COMMAND_LENGTH 42
+#define FAILURE -1
+#define SUCCESS 1
 
 
 /**
@@ -87,53 +89,63 @@ int execCommand(char *command) {
 }
 
 
+int cdComplexCommand(char *dir, char lastDir[COMMAND_LENGTH], int flag){
+    char currentDir[COMMAND_LENGTH];
+    getcwd(currentDir,COMMAND_LENGTH);
+    if(chdir(dir)==FAILURE){
+        fprintf(stderr,"Error in system call");
+        printf("\n");
+        return FAILURE;
+    }else{
+        if(flag){
+            printf("%s\n",dir);
+        }
+        strcpy(lastDir,currentDir);
+        return SUCCESS;
+    }
+}
+
 /**
  * make the cd command. if there is no argv[1] than it goes to the hone directory.
  * @param command  is the command.
- * @return if succeded or not.
+ * @return if succeeded or not.
  */
-int cdCommand(char *command, char *dirOld){
+int cdCommand(char *command, char dirToGo[COMMAND_LENGTH]){
     char *argv[COMMAND_LENGTH];// moving the arguments to an array
     makeArgumentsArray(command, argv);
-    if(argv[1] == NULL) {
-        // cd does not signify which directory to go to
-        chdir(getenv("HOME"));
-        return 1;
-
-    } else { // going to the path in the arguments
-        if (chdir(argv[1]) == -1){
-            fprintf(stderr, "Error in system call");
+    // cd does not signify which directory to go to
+    if(argv[1] == NULL){
+        char currentDir[COMMAND_LENGTH]; //buffer to save the current directory
+        getcwd(currentDir,COMMAND_LENGTH); //get the current directory
+        if(chdir(getenv("HOME"))!=FAILURE){
+            strcpy(dirToGo,currentDir);
+            return SUCCESS;
+        }else{
+            fprintf(stderr,"Error in system call");
             printf("\n");
             return  -1;
         }
-    }
-
-    /*
-    int j;
-    if ((argv[1] ==  NULL) || (!strcmp(argv[1], "~") && argv[2] == NULL)) {
-        //get current working directory
-        getcwd(dirOld, sizeof(COMMAND_LENGTH));
-        chdir(getenv("HOME"));
-    } else if (!strcmp(argv[1], "-") && argv[2] == NULL) {
-        char cwd[COMMAND_LENGTH];
-        getcwd(cwd, sizeof(COMMAND_LENGTH));
-        j = chdir(dirOld);
-        if (j == 0) {
-            printf("%s\n", dirOld);
+    }else{ //argv[1]!=Null
+        // cd - prints the last directory we were before
+        if((strcmp(argv[1], "-") == 0) &&argv[2] == NULL){
+            return cdComplexCommand(dirToGo, dirToGo, 1);
+        }else if((strcmp(argv[1], "~") == 0) &&argv[2] == NULL){
+            // going to the Home directory with ~
+            if(chdir(getenv("HOME"))!=FAILURE){
+                // any ways saves the home directory as the last directory we did cd to.
+                strcpy(dirToGo,"HOME");
+                return SUCCESS;
+            }else{
+                fprintf(stderr,"Error in system call");
+                printf("\n");
+                return  -1;
+            }
+        }else{
+            return cdComplexCommand(argv[1],dirToGo,0);
         }
-        strcpy(dirOld, cwd);
-    } else {
-        //get current working directory
-        getcwd(dirOld, sizeof(COMMAND_LENGTH));
-        j=chdir(argv[1]);
     }
-    if(j!=0){
-        fprintf(stderr,"Error in system call");
-    }
-*/
-
-
 }
+
 
 
 int main() {
@@ -141,7 +153,7 @@ int main() {
     char line[COMMAND_LENGTH];
     char cmd[COMMAND_LENGTH];
     //char *directoryOld;
-    char *dirOld;
+    char dirOld[COMMAND_LENGTH];
     pid_t pid; // the process that is currently running.
     char jobsArray[COMMAND_LENGTH][COMMAND_LENGTH];
     int pidArray[COMMAND_LENGTH];
